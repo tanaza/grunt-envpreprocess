@@ -25,24 +25,24 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('envpreprocess', 'preprocess environment variables', function() {      
-      
+  grunt.registerMultiTask('envpreprocess', 'preprocess environment variables', function() {
+
     //default environment to 'dev', and grab destination
     var environment = this.target || "dev",
         dest = this.data.options.replacePath;
         //dest = this.data.files.dest;
-      
+
           //read environment parameter passed in
     if(this.data.options.environment){
         environment = this.data.options.environment;
     }
-      
+
     var optionsForReplace = this.options({
         src: [dest],
         overwrite:true,
         replacements: []
     });
-      
+
     this.files.forEach(function(f) {
         //grab src
         var src = f.src.filter(function(filepath) {
@@ -54,13 +54,13 @@ module.exports = function(grunt) {
               return true;
             }
         });
-        
+
         grunt.log.writeln("Reading ENV variables from " + src[0]);
 
         //load config into object from src
         var config = grunt.file.readJSON(src[0]);
         var replacementsArr = [];
-        
+
         //iterate over each config variable key
         var configKeys = Object.keys(config).forEach(function(key){
             var val = null,
@@ -69,7 +69,7 @@ module.exports = function(grunt) {
             if(!config[key][environment]){
                 //check for a "*" if no matching environment var
                 if(!config[key]["*"]){
-                    grunt.log.warn("WARNING: No corresponding ENV variable for " + key);   
+                    grunt.log.warn("WARNING: No corresponding ENV variable for " + key);
                     warned = true;
                 }else{
                     val = config[key]["*"];
@@ -77,22 +77,22 @@ module.exports = function(grunt) {
             }
             //grab corresponding ENV var
             if(val == null ){
-               val = config[key][environment];  
+               val = config[key][environment];
             }
             if(val == null){
                 if(!warned){
-                    grunt.log.warn("WARNING: No corresponding ENV variable for " + key); 
+                    grunt.log.warn("WARNING: No corresponding ENV variable for " + key);
                 }
             }
-            var replaceString = "ENV." + key;
+            var replaceString = key;
 
             //add to replacements array
             replacementsArr.push({
                 from: replaceString,
                 to: val
             });
-            
-           
+
+
         });
 
         optionsForReplace.replacements = replacementsArr;
@@ -106,7 +106,7 @@ module.exports = function(grunt) {
 
         }
         catch(err){
-            grunt.log.error("ERROR: Envpreprocess replace error: " + err);   
+            grunt.log.error("ERROR: Envpreprocess replace error: " + err);
         }
     });
   });
@@ -116,4 +116,3 @@ module.exports = function(grunt) {
     /*"grunt-text-replace" : "~0.4.0",
     "extend-grunt-plugin" : "~0.1.0",
     "recursive-readdir":"~1.2.1",*/
-
